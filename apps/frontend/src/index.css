@@ -1,0 +1,259 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-zinc-50: 250 250 255;
+  --color-zinc-100: 245 245 250;
+  --color-zinc-150: 240 240 245;
+  --color-zinc-200: 228 228 231;
+  --color-zinc-250: 212 212 216;
+  --color-zinc-300: 212 212 216;
+  --color-zinc-350: 161 161 170;
+  --color-zinc-400: 161 161 170;
+  --color-zinc-450: 140 140 150;
+  --color-zinc-500: 113 113 122;
+  --color-zinc-550: 82 82 91;
+  --color-zinc-600: 82 82 91;
+  --color-zinc-650: 70 70 78;
+  --color-zinc-700: 42 38 61;
+  --color-zinc-750: 34 30 51;
+  --color-zinc-800: 34 30 51;     /* hairline borders */
+  --color-zinc-850: 28 24 43;
+  --color-zinc-900: 22 19 36;     /* mid plum panel/card */
+  --color-zinc-905: 18 15 28;
+  --color-zinc-950: 13 11 20;     /* obsidian background */
+}
+
+@layer base {
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased selection:bg-indigo-500/30 selection:text-indigo-200;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
+
+
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-zinc-950;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-800 rounded-full hover:bg-zinc-700 transition-colors;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  @apply bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 shadow-xl shadow-black/20;
+}
+
+.glass-panel-hover {
+  @apply hover:bg-zinc-900/80 hover:border-zinc-700/60 transition-all duration-300;
+}
+
+.glass-input {
+  @apply bg-zinc-900/80 border border-zinc-800 rounded-lg pr-3 py-2 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200;
+}
+
+.glass-card {
+  @apply bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 rounded-xl p-6 shadow-lg shadow-black/10;
+}
+
+/* React Flow custom styles */
+.react-flow__renderer {
+  @apply bg-zinc-950;
+}
+
+.react-flow__handle {
+  @apply w-2.5 h-2.5 bg-zinc-900 border-2 border-indigo-500 rounded-full hover:scale-125 transition-transform !important;
+}
+
+.react-flow__handle-left, .react-flow__handle-right {
+  @apply bg-zinc-900 border-indigo-500 !important;
+}
+
+.react-flow__controls {
+  @apply glass-panel rounded-lg border-zinc-800/80 overflow-hidden shadow-2xl !important;
+}
+
+.react-flow__controls-button {
+  @apply bg-zinc-900/80 border-b border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-all duration-150 !important;
+}
+
+.react-flow__edge-path {
+  @apply stroke-zinc-700 stroke-2 !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  @apply stroke-indigo-500 stroke-[3px] !important;
+}
+
+/* Custom animation classes */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Execution status node animations */
+@keyframes exec-running-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+}
+
+@keyframes exec-success-flash {
+  0% { box-shadow: 0 0 0 rgba(52, 211, 153, 0); }
+  50% { box-shadow: 0 0 16px rgba(52, 211, 153, 0.5); }
+  100% { box-shadow: 0 0 4px rgba(52, 211, 153, 0.2); }
+}
+
+@keyframes exec-failed-flash {
+  0% { box-shadow: 0 0 0 rgba(248, 113, 113, 0); }
+  50% { box-shadow: 0 0 16px rgba(248, 113, 113, 0.5); }
+  100% { box-shadow: 0 0 4px rgba(248, 113, 113, 0.2); }
+}
+
+.node-exec-running {
+  animation: exec-running-glow 1.5s ease-in-out infinite;
+}
+
+.node-exec-success {
+  animation: exec-success-flash 0.6s ease-out forwards;
+}
+
+.node-exec-failed {
+  animation: exec-failed-flash 0.6s ease-out forwards;
+}
+
+/* Edge hover styles */
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #a78bfa !important;
+  stroke-width: 3 !important;
+}
+
+/* Selection box styling */
+.react-flow__selection {
+  @apply border border-indigo-500/40 bg-indigo-500/5 !important;
+}
+
+/* Light Mode overrides (Figma System Canvas & Ink) */
+.light-theme {
+  --color-zinc-50: 0 0 0;
+  --color-zinc-100: 0 0 0;      /* pure black ink */
+  --color-zinc-150: 15 15 15;
+  --color-zinc-200: 30 30 30;
+  --color-zinc-250: 50 50 50;
+  --color-zinc-300: 50 50 50;
+  --color-zinc-350: 85 85 85;
+  --color-zinc-400: 85 85 85;
+  --color-zinc-450: 110 110 110;
+  --color-zinc-500: 110 110 110;
+  --color-zinc-550: 160 160 160;
+  --color-zinc-600: 160 160 160;
+  --color-zinc-650: 210 210 210;
+  --color-zinc-700: 230 230 230;  /* hairline: #e6e6e6 */
+  --color-zinc-750: 230 230 230;
+  --color-zinc-800: 230 230 230;  /* hairline: #e6e6e6 */
+  --color-zinc-850: 241 241 241;  /* hairline-soft: #f1f1f1 */
+  --color-zinc-900: 255 255 255;  /* canvas: pure white */
+  --color-zinc-905: 247 247 245;  /* surface-soft: #f7f7f5 */
+  --color-zinc-950: 255 255 255;  /* canvas: pure white */
+
+  @apply bg-white text-black selection:bg-indigo-100 selection:text-indigo-900;
+}
+
+.light-theme ::-webkit-scrollbar-track {
+  @apply bg-zinc-50;
+}
+
+.light-theme ::-webkit-scrollbar-thumb {
+  @apply bg-zinc-200 hover:bg-zinc-300;
+}
+
+.light-theme .glass-panel {
+  @apply bg-white border border-zinc-200 shadow-xl;
+}
+
+.light-theme .glass-panel-hover {
+  @apply hover:bg-zinc-50/60 hover:border-zinc-300 transition-all duration-300;
+}
+
+.light-theme .glass-card {
+  @apply bg-white border border-zinc-200 rounded-3xl p-6 shadow-none;
+}
+
+.light-theme .glass-input {
+  @apply bg-white border border-zinc-250 rounded-lg pr-3 py-2 text-black placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all duration-200;
+}
+
+.light-theme input, .light-theme select, .light-theme textarea {
+  @apply bg-white border border-zinc-250 text-black focus:ring-1 focus:ring-black focus:border-black !important;
+}
+
+.light-theme .react-flow__renderer {
+  @apply bg-zinc-905 !important;
+}
+
+.light-theme .react-flow__controls {
+  @apply bg-white border-zinc-200 !important;
+}
+
+.light-theme .react-flow__controls-button {
+  @apply bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-black !important;
+}
+
+/* Figma typography helpers */
+.figma-display-xl {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 86px;
+  font-weight: 300;
+  line-height: 1.00;
+  letter-spacing: -1.72px;
+}
+
+.figma-display-lg {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 64px;
+  font-weight: 300;
+  line-height: 1.10;
+  letter-spacing: -0.96px;
+}
+
+.figma-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.30;
+  letter-spacing: 0.54px;
+  text-transform: uppercase;
+}
+
+.figma-caption {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.00;
+  letter-spacing: 0.60px;
+  text-transform: uppercase;
+}
+
+
+

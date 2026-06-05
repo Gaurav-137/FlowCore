@@ -1,0 +1,267 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+  WAITING
+}
+
+enum NodeExecStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+// ── User ───────────────────────────────────────────────
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  role          String         @default("user")
+  createdAt     DateTime       @default(now())
+  workflows     Workflow[]
+  refreshTokens RefreshToken[]
+  credentials   Credential[]
+  variables     Variable[]
+}
+
+// ── Workflow ───────────────────────────────────────────
+
+model Workflow {
+  id          String         @id @default(cuid())
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String
+  name        String
+  description String?
+  status      WorkflowStatus @default(DRAFT)
+  version     Int            @default(1)
+  settings    Json?
+  staticData  Json?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime?      @updatedAt
+  nodes       WorkflowNode[]
+  edges       WorkflowEdge[]
+  runs        WorkflowRun[]
+  schedules   WorkflowSchedule[]
+  webhooks    Webhook[]
+  versions    WorkflowVersion[]
+  tags        WorkflowTagBinding[]
+  pinData     NodePinData[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model WorkflowNode {
+  id         String   @id @default(cuid())
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId String
+  type       String
+  label      String?
+  config     Json
+  positionX  Float
+  positionY  Float
+  disabled   Boolean  @default(false)
+  settings   Json?
+
+  @@index([workflowId])
+}
+
+model WorkflowEdge {
+  id           String   @id @default(cuid())
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId   String
+  sourceNodeId String
+  targetNodeId String
+  sourceOutput Int?     @default(0)
+  targetInput  Int?     @default(0)
+  branchType   String?
+
+  @@index([workflowId])
+  @@index([sourceNodeId])
+}
+
+// ── Execution ──────────────────────────────────────────
+
+model WorkflowRun {
+  id                 String          @id @default(cuid())
+  workflow           Workflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId         String
+  status             RunStatus       @default(PENDING)
+  mode               String          @default("manual")
+  startedAt          DateTime        @default(now())
+  completedAt        DateTime?
+  triggerPayload     Json?
+  nodeExecutions     NodeExecution[]
+  executionData      ExecutionData?
+  errorMessage       String?
+  lastExecutedNodeId String?
+
+  @@index([workflowId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model NodeExecution {
+  id            String         @id @default(cuid())
+  workflowRun   WorkflowRun    @relation(fields: [workflowRunId], references: [id], onDelete: Cascade)
+  workflowRunId String
+  nodeId        String
+  nodeName      String?
+  status        NodeExecStatus @default(PENDING)
+  inputData     Json?
+  outputData    Json?
+  durationMs    Int?
+  errorMessage  String?
+  attempt       Int            @default(1)
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  @@unique([workflowRunId, nodeId])
+  @@index([workflowRunId])
+}
+
+model ExecutionData {
+  id            String      @id @default(cuid())
+  workflowRunId String      @unique
+  workflowRun   WorkflowRun @relation(fields: [workflowRunId], references: [id], onDelete: Cascade)
+  data          Json
+  createdAt     DateTime    @default(now())
+}
+
+// ── Triggers ───────────────────────────────────────────
+
+model WorkflowSchedule {
+  id             String   @id @default(cuid())
+  workflow       Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId     String
+  cronExpression String
+  timezone       String   @default("UTC")
+  enabled        Boolean  @default(true)
+
+  @@index([workflowId])
+}
+
+model Webhook {
+  id         String   @id @default(cuid())
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId String
+  secret     String
+  enabled    Boolean  @default(true)
+
+  @@index([workflowId])
+}
+
+// ── Credentials ────────────────────────────────────────
+
+model Credential {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  data      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+}
+
+// ── Variables ──────────────────────────────────────────
+
+model Variable {
+  id        String   @id @default(cuid())
+  key       String
+  value     String
+  type      String   @default("string")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, key])
+  @@index([userId])
+}
+
+// ── Versioning ─────────────────────────────────────────
+
+model WorkflowVersion {
+  id         String   @id @default(cuid())
+  workflowId String
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  version    Int
+  snapshot   Json
+  comment    String?
+  createdBy  String
+  createdAt  DateTime @default(now())
+
+  @@unique([workflowId, version])
+  @@index([workflowId])
+}
+
+// ── Tags ───────────────────────────────────────────────
+
+model WorkflowTag {
+  id        String               @id @default(cuid())
+  name      String               @unique
+  color     String               @default("#6366f1")
+  workflows WorkflowTagBinding[]
+}
+
+model WorkflowTagBinding {
+  workflowId String
+  tagId      String
+  workflow   Workflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  tag        WorkflowTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([workflowId, tagId])
+}
+
+// ── Pin Data ───────────────────────────────────────────
+
+model NodePinData {
+  id         String   @id @default(cuid())
+  workflowId String
+  nodeId     String
+  data       Json
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, nodeId])
+}
+
+// ── Auth ───────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  token     String   @unique
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
